@@ -76,28 +76,32 @@ export default async function CandidaturesListPage({
               <th className="py-3 px-4">Entretien</th>
               <th className="py-3 px-4">Note globale</th>
               <th className="py-3 px-4">Statut</th>
+              <th className="py-3 px-4"></th>
             </tr>
           </thead>
           <tbody>
             {candidatures?.map((c: any) => (
               <tr key={c.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                 <td className="py-3 px-4">
-                  <Link href={`/rh/candidatures/${c.id}`} className="font-medium text-blue-600 hover:underline">
-                    {c.nom_complet}
-                  </Link>
+                  <p className="font-medium text-slate-800">{c.nom_complet}</p>
                   <p className="text-xs text-slate-400">{c.email}</p>
                 </td>
-                <td className="py-3 px-4">{c.postes?.titre || '—'}</td>
-                <td className="py-3 px-4">{c.ville || '—'}</td>
-                <td className="py-3 px-4">{c.niveau_etudes || '—'}</td>
-                <td className="py-3 px-4">{c.score_cv ?? '—'}</td>
-                <td className="py-3 px-4">{c.note_entretien ?? '—'}</td>
-                <td className="py-3 px-4 font-medium">{c.note_globale ?? '—'}</td>
+                <td className="py-3 px-4 text-sm">{c.postes?.titre || '—'}</td>
+                <td className="py-3 px-4 text-sm">{c.ville || '—'}</td>
+                <td className="py-3 px-4 text-sm">{c.niveau_etudes || '—'}</td>
+                <td className="py-3 px-4 text-sm font-medium">{c.score_cv ?? '—'}</td>
+                <td className="py-3 px-4 text-sm">{c.note_entretien ?? '—'}</td>
+                <td className="py-3 px-4 text-sm font-bold text-slate-800">{c.note_globale ?? '—'}</td>
                 <td className="py-3 px-4"><StatutBadge statut={c.statut} /></td>
+                <td className="py-3 px-4">
+                  <Link href={`/rh/candidatures/${c.id}`} className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap">
+                    Voir →
+                  </Link>
+                </td>
               </tr>
             ))}
             {(!candidatures || candidatures.length === 0) && (
-              <tr><td colSpan={8} className="py-8 text-center text-slate-400">Aucune candidature ne correspond aux filtres</td></tr>
+              <tr><td colSpan={9} className="py-8 text-center text-slate-400">Aucune candidature ne correspond aux filtres</td></tr>
             )}
           </tbody>
         </table>

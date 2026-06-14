@@ -72,20 +72,16 @@ function UploadFormationContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-lg w-full">
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <a href="/rh/postes" className="text-sm text-slate-400 hover:text-blue-600 transition-colors">← Retour aux postes</a>
+        <h1 className="text-2xl font-bold text-slate-900 mt-2">Générer la formation</h1>
+        <p className="text-slate-500 text-sm mt-1">
+          Uploadez le support de cours — l'IA génère la formation automatiquement
+        </p>
+      </div>
 
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-blue-900 rounded-xl flex items-center justify-center mx-auto mb-3">
-            <span className="text-white text-xl">📚</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Générer la formation</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Uploadez le support de cours — l'IA génère la formation automatiquement
-          </p>
-        </div>
-
-        <div className="bg-white rounded-2xl border shadow-sm p-8">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
 
           {/* ÉTAPE UPLOAD */}
           {etape === 'upload' && (
@@ -181,7 +177,6 @@ function UploadFormationContent() {
           )}
 
         </div>
-      </div>
     </div>
   )
 }
