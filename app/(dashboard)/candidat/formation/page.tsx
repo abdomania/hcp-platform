@@ -2,15 +2,16 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
-import { supabase } from '@/lib/supabase' // Assurez-vous que ce chemin est correct
+import { supabase } from '@/lib/supabase'
 
 function FormationContent() {
   const params = useSearchParams()
   const router = useRouter()
-  const candidatureId = params.get('id')
+  const candidatureIdParam = params.get('id')
 
   // --- ÉTATS ---
   const [loading, setLoading] = useState(true)
+  const [candidatureId, setCandidatureId] = useState<string | null>(candidatureIdParam)
   const [formation, setFormation] = useState<any>(null)
   const [progression, setProgression] = useState<any>(null)
   const [chapitreActif, setChapitreActif] = useState(0)
@@ -28,12 +29,35 @@ function FormationContent() {
   const [erreur, setErreur] = useState('')
 
   // --- CHARGEMENT ---
-  useEffect(() => { chargerDonnees() }, [candidatureId])
+  useEffect(() => { resoudreCandidatureEtCharger() }, [candidatureIdParam])
 
-  const chargerDonnees = async () => {
-    if (!candidatureId) return
+  const resoudreCandidatureEtCharger = async () => {
+    let id = candidatureIdParam
+
+    // Si pas d'id dans l'URL, on cherche la candidature de l'utilisateur connecté
+    if (!id) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+
+      const { data: cand } = await supabase
+        .from('candidatures')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (!cand) { setErreur('Aucune candidature trouvée pour votre compte.'); setLoading(false); return }
+      id = cand.id
+      setCandidatureId(id)
+    }
+
+    if (id) await chargerDonnees(id)
+  }
+
+  const chargerDonnees = async (id: string) => {
     try {
-      const res = await fetch(`/api/formations?candidature_id=${candidatureId}`)
+      const res = await fetch(`/api/formations?candidature_id=${id}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       
@@ -90,7 +114,7 @@ function FormationContent() {
           score_quiz: scoreFinal
         })
       })
-      await chargerDonnees()
+      if (candidatureId) await chargerDonnees(candidatureId)
       setMode('lecture')
       // Si c'est le dernier chapitre, proposer l'examen
       if (chapitreActif === formation.chapitres.length - 1) {
