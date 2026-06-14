@@ -5,13 +5,14 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CandidatureDetailPage({ params }: { params: { id: string } }) {
+export default async function CandidatureDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createServerSupabase()
 
   const { data: candidature } = await supabase
     .from('candidatures')
     .select('*, postes(id, titre, seuil_score_cv, seuil_note_globale, seuil_formation)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!candidature) {
@@ -19,21 +20,21 @@ export default async function CandidatureDetailPage({ params }: { params: { id: 
   }
 
   const [{ data: entretien }, { data: progression }] = await Promise.all([
-    supabase.from('entretiens').select('*').eq('candidature_id', params.id).single(),
-    supabase.from('progressions').select('*').eq('candidature_id', params.id).single(),
+    supabase.from('entretiens').select('*').eq('candidature_id', id).single(),
+    supabase.from('progressions').select('*').eq('candidature_id', id).single(),
   ])
 
   async function validerCandidature() {
     'use server'
     const supabase = await createServerSupabase()
-    await supabase.from('candidatures').update({ rh_validation: true, statut: 'valide' }).eq('id', params.id)
+    await supabase.from('candidatures').update({ rh_validation: true, statut: 'valide' }).eq('id', id)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     fetch(`${baseUrl}/api/contrats`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ candidature_id: params.id }),
+      body: JSON.stringify({ candidature_id: id }),
     }).catch((e) => console.error('[valider] Contrat fetch error:', e))
-    revalidatePath(`/rh/candidatures/${params.id}`)
+    revalidatePath(`/rh/candidatures/${id}`)
     revalidatePath('/rh/candidatures')
     revalidatePath('/rh')
   }
@@ -41,8 +42,8 @@ export default async function CandidatureDetailPage({ params }: { params: { id: 
   async function rejeterCandidature() {
     'use server'
     const supabase = await createServerSupabase()
-    await supabase.from('candidatures').update({ rh_validation: false, statut: 'rejete' }).eq('id', params.id)
-    revalidatePath(`/rh/candidatures/${params.id}`)
+    await supabase.from('candidatures').update({ rh_validation: false, statut: 'rejete' }).eq('id', id)
+    revalidatePath(`/rh/candidatures/${id}`)
     revalidatePath('/rh/candidatures')
     revalidatePath('/rh')
   }
