@@ -195,7 +195,7 @@ function FormationContent() {
           })}
           
           {progression?.chapitres_valides?.length === formation.chapitres.length && (
-            <button 
+            <button
               onClick={() => setMode('examen')}
               className={`w-full mt-4 flex items-center gap-3 p-4 rounded-xl text-left bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-all`}
             >
@@ -203,6 +203,33 @@ function FormationContent() {
               <span className="text-sm font-bold">Examen Final de Certification</span>
             </button>
           )}
+
+          {/* MODE TEST */}
+          <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+            <p className="text-xs font-bold text-yellow-700 mb-2 uppercase">Mode Test</p>
+            <div className="space-y-2">
+              <button
+                onClick={async () => {
+                  if (!candidatureId) return
+                  await fetch('/api/formations/progression', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidature_id: candidatureId, note_examen: 85 }) })
+                  setNoteFinale(85); setMode('termine')
+                }}
+                className="w-full text-xs font-bold py-2 px-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
+              >
+                Simuler Réussite (85/100)
+              </button>
+              <button
+                onClick={async () => {
+                  if (!candidatureId) return
+                  await fetch('/api/formations/progression', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ candidature_id: candidatureId, note_examen: 40 }) })
+                  setNoteFinale(40); setMode('termine')
+                }}
+                className="w-full text-xs font-bold py-2 px-3 rounded-lg bg-red-500 text-white hover:bg-red-600"
+              >
+                Simuler Échec (40/100)
+              </button>
+            </div>
+          </div>
         </nav>
       </aside>
 
