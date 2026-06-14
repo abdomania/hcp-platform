@@ -1,65 +1,90 @@
-import Image from "next/image";
+import Link from 'next/link'
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800">
+      
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-blue-700/40">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+            <span className="text-blue-900 font-black text-lg">H</span>
+          </div>
+          <div>
+            <p className="text-white font-bold text-sm leading-none">HCP Recrutement</p>
+            <p className="text-blue-300 text-xs">Plateforme intelligente</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="flex items-center gap-3">
+          <Link href="/login"
+            className="text-blue-200 hover:text-white text-sm transition-colors px-4 py-2">
+            Connexion
+          </Link>
+          <Link href="/candidature"
+            className="bg-white text-blue-900 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-blue-50 transition-colors">
+            Postuler maintenant
+          </Link>
         </div>
-      </main>
-    </div>
-  );
+      </nav>
+
+      {/* Hero */}
+      <section className="max-w-5xl mx-auto px-8 pt-24 pb-20 text-center">
+        <div className="inline-flex items-center gap-2 bg-blue-800/50 border border-blue-600/40 rounded-full px-4 py-1.5 mb-8">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-blue-200 text-sm">Recrutement ouvert — Enquête nationale 2025</span>
+        </div>
+
+        <h1 className="text-5xl font-extrabold text-white leading-tight mb-6">
+          Rejoignez les équipes terrain
+          <span className="block text-blue-300 mt-1">du Haut-Commissariat au Plan</span>
+        </h1>
+
+        <p className="text-blue-200 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+          Postulez en quelques minutes. Notre plateforme analyse votre profil, 
+          vous prépare à la mission et vous accompagne jusqu'au contrat.
+        </p>
+
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <Link href="/candidature"
+            className="bg-white text-blue-900 font-bold px-8 py-4 rounded-xl hover:bg-blue-50 transition-all hover:scale-105 shadow-lg">
+            Déposer ma candidature →
+          </Link>
+          <Link href="/login"
+            className="border border-blue-500 text-white font-semibold px-8 py-4 rounded-xl hover:bg-blue-800/50 transition-colors">
+            Espace RH / Admin
+          </Link>
+        </div>
+      </section>
+
+      {/* Étapes du processus */}
+      <section className="max-w-5xl mx-auto px-8 pb-24">
+        <p className="text-blue-300 text-sm text-center uppercase tracking-widest mb-10">
+          Comment ça fonctionne
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[
+            { num: "01", titre: "Déposez votre CV", desc: "Sans créer de compte. L'IA analyse votre profil en quelques secondes." },
+            { num: "02", titre: "Passez l'entretien", desc: "Questions ciblées à l'écrit et à l'oral, adaptées au poste visé." },
+            { num: "03", titre: "Suivez la formation", desc: "Formation générée automatiquement, avec quiz et examen final." },
+            { num: "04", titre: "Signez le contrat", desc: "Contrat généré et envoyé par email dès validation de votre dossier." },
+          ].map((step) => (
+            <div key={step.num}
+              className="bg-blue-800/30 border border-blue-700/40 rounded-2xl p-6 hover:bg-blue-800/50 transition-colors">
+              <span className="text-blue-400 font-black text-3xl">{step.num}</span>
+              <h3 className="text-white font-bold mt-3 mb-2">{step.titre}</h3>
+              <p className="text-blue-300 text-sm leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-blue-700/40 px-8 py-6 text-center">
+        <p className="text-blue-400 text-sm">
+          © 2026 Haut-Commissariat au Plan — Maroc
+        </p>
+      </footer>
+
+    </main>
+  )
 }
