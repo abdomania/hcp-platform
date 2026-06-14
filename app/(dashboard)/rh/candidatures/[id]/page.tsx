@@ -50,10 +50,14 @@ export default async function CandidatureDetailPage({ params }: { params: Promis
 
   const cvData = candidature.cv_data || {}
   const statut = candidature.statut
-  const dejaDecide = statut === 'valide' || statut === 'rejete'
+  const rhValidation = candidature.rh_validation === true
+  const dejaRejeté = statut === 'rejete'
+  const dejaValidéRH = statut === 'valide' && rhValidation
+  const validéParIA = statut === 'valide' && !rhValidation
   const formationComplete = progression?.note_examen !== null && progression?.note_examen !== undefined
   const formationReussie = formationComplete && progression.note_examen >= (candidature.postes?.seuil_formation ?? 70)
-  const peutValider = statut === 'formation' && formationReussie
+  // RH peut valider si : validé par IA (formation réussie) ou formation complète et réussie
+  const peutValider = validéParIA || (statut === 'formation' && formationReussie)
 
   // Étapes du pipeline
   const etapes = [
@@ -80,10 +84,20 @@ export default async function CandidatureDetailPage({ params }: { params: Promis
             {candidature.postes?.titre || '—'} · {candidature.ville || '—'}
           </p>
         </div>
-        <StatutBadge statut={statut} />
+        <StatutBadge statut={statut} rhValidation={candidature.rh_validation} />
       </div>
 
       {/* PIPELINE */}
+      {validéParIA && (
+        <div className="bg-orange-50 border border-orange-200 rounded-xl px-5 py-4 flex items-center gap-3">
+          <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-lg flex-shrink-0">🤖</div>
+          <div>
+            <p className="font-semibold text-orange-800 text-sm">Formation validée par l'IA — En attente de décision RH</p>
+            <p className="text-orange-600 text-xs mt-0.5">Le candidat a réussi l'examen de formation. Vous pouvez maintenant valider son dossier et générer son contrat.</p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl border border-slate-200 p-5">
         <div className="flex items-center justify-between relative">
           <div className="absolute left-0 right-0 top-4 h-0.5 bg-slate-100 z-0 mx-8" />
@@ -197,79 +211,78 @@ export default async function CandidatureDetailPage({ params }: { params: Promis
       <section className="bg-white rounded-xl border border-slate-200 p-5">
         <h2 className="font-semibold text-slate-900 mb-4">Décision RH</h2>
 
-        {statut === 'valide' && (
+        {/* Dossier validé par le RH */}
+        {dejaValidéRH && (
           <div className="space-y-4">
             <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4">
-              <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg">✓</div>
+              <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">✓</div>
               <div>
-                <p className="font-semibold text-emerald-800">Dossier validé</p>
-                <p className="text-sm text-emerald-600">Le candidat a été retenu pour ce poste.</p>
+                <p className="font-bold text-emerald-800">Dossier validé par le responsable RH</p>
+                <p className="text-sm text-emerald-600 mt-0.5">Le candidat a été retenu pour ce poste.</p>
               </div>
             </div>
             {candidature.contrat_url ? (
               <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
                 <div>
-                  <p className="font-medium text-slate-800 text-sm">Contrat PDF généré</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Envoyé par email au candidat</p>
+                  <p className="font-semibold text-slate-800 text-sm">Contrat PDF généré et envoyé</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Le contrat a été envoyé par email au candidat ({candidature.email})</p>
                 </div>
                 <a
                   href={candidature.contrat_url}
                   target="_blank"
-                  className="flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
                 >
                   Télécharger le PDF ↗
                 </a>
               </div>
             ) : (
               <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-                <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-sm text-amber-700">Génération du contrat PDF en cours...</p>
+                <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">Génération du contrat PDF en cours...</p>
+                  <p className="text-xs text-amber-600 mt-0.5">Le contrat sera envoyé automatiquement par email au candidat.</p>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {statut === 'rejete' && (
+        {/* Dossier rejeté */}
+        {dejaRejeté && (
           <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
-            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">✗</div>
+            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">✗</div>
             <div>
-              <p className="font-semibold text-red-800">Dossier rejeté</p>
-              <p className="text-sm text-red-600">Ce candidat n'a pas été retenu.</p>
+              <p className="font-bold text-red-800">Dossier rejeté</p>
+              <p className="text-sm text-red-600 mt-0.5">Ce candidat n'a pas été retenu pour ce poste.</p>
             </div>
           </div>
         )}
 
-        {!dejaDecide && (
+        {/* Décision en attente */}
+        {!dejaValidéRH && !dejaRejeté && (
           <div className="space-y-4">
-            {!peutValider && statut === 'formation' && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-500">
-                {!formationComplete
-                  ? 'En attente de la fin de la formation pour pouvoir valider.'
-                  : `Note insuffisante (${progression?.note_examen}/100 — seuil : ${candidature.postes?.seuil_formation ?? 70}).`
-                }
+            {!peutValider && (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-500">
+                {statut === 'formation' && !formationComplete && 'En attente de la fin de la formation.'}
+                {statut === 'formation' && formationComplete && !formationReussie && `Note insuffisante (${progression?.note_examen}/100 — seuil requis : ${candidature.postes?.seuil_formation ?? 70}).`}
+                {statut !== 'formation' && statut !== 'valide' && `La validation est disponible après la formation (statut actuel : ${statut}).`}
               </div>
             )}
 
-            {statut !== 'formation' && statut !== 'valide' && statut !== 'rejete' && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-500">
-                La candidature est au stade <strong>{statut}</strong>. La validation est disponible après la formation.
-              </div>
-            )}
-
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <form action={validerCandidature}>
                 <button
                   type="submit"
                   disabled={!peutValider}
-                  className="bg-emerald-600 text-white rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  className="bg-emerald-600 text-white rounded-xl px-6 py-3 text-sm font-bold hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
                 >
-                  ✓ Valider le dossier
+                  ✓ Valider et générer le contrat
                 </button>
               </form>
               <form action={rejeterCandidature}>
                 <button
                   type="submit"
-                  className="bg-white text-red-600 border border-red-200 rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-red-50 transition-colors"
+                  className="bg-white text-red-600 border border-red-200 rounded-xl px-6 py-3 text-sm font-semibold hover:bg-red-50 transition-colors"
                 >
                   ✗ Rejeter le dossier
                 </button>

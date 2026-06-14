@@ -11,7 +11,7 @@ export default async function RHDashboardPage() {
   // 1. Récupérer uniquement les 5 candidatures les plus récentes pour le tableau
   const { data: recentes } = await supabase
     .from('candidatures')
-    .select('id, statut, nom_complet, ville, score_cv, note_globale, created_at, postes(titre)')
+    .select('id, statut, rh_validation, nom_complet, ville, score_cv, note_globale, created_at, postes(titre)')
     .order('created_at', { ascending: false })
     .limit(5) // On limite le téléchargement des données lourdes
 
@@ -81,7 +81,7 @@ export default async function RHDashboardPage() {
                 <td className="py-2">{c.ville || '—'}</td>
                 <td className="py-2">{c.score_cv ?? '—'}</td>
                 <td className="py-2">{c.note_globale ?? '—'}</td>
-                <td className="py-2"><StatutBadge statut={c.statut} /></td>
+                <td className="py-2"><StatutBadge statut={c.statut} rhValidation={c.rh_validation} /></td>
               </tr>
             ))}
             {(!recentes || recentes.length === 0) && (

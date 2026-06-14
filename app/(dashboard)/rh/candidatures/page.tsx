@@ -22,7 +22,7 @@ export default async function CandidaturesListPage({
 
   let query = supabase
     .from('candidatures')
-    .select('id, nom_complet, email, ville, niveau_etudes, score_cv, note_entretien, note_globale, statut, created_at, postes(id, titre)')
+    .select('id, nom_complet, email, ville, niveau_etudes, score_cv, note_entretien, note_globale, statut, rh_validation, created_at, postes(id, titre)')
     .order('created_at', { ascending: false })
 
   if (searchParams.statut) query = query.eq('statut', searchParams.statut)
@@ -92,7 +92,7 @@ export default async function CandidaturesListPage({
                 <td className="py-3 px-4 text-sm font-medium">{c.score_cv ?? '—'}</td>
                 <td className="py-3 px-4 text-sm">{c.note_entretien ?? '—'}</td>
                 <td className="py-3 px-4 text-sm font-bold text-slate-800">{c.note_globale ?? '—'}</td>
-                <td className="py-3 px-4"><StatutBadge statut={c.statut} /></td>
+                <td className="py-3 px-4"><StatutBadge statut={c.statut} rhValidation={c.rh_validation} /></td>
                 <td className="py-3 px-4">
                   <Link href={`/rh/candidatures/${c.id}`} className="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap">
                     Voir →
