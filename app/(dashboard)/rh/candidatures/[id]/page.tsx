@@ -64,7 +64,7 @@ export default async function CandidatureDetailPage({ params }: { params: Promis
     { key: 'cv', label: 'CV reçu', done: true },
     { key: 'entretien', label: 'Entretien', done: !!entretien },
     { key: 'formation', label: 'Formation', done: formationComplete },
-    { key: 'decision', label: 'Décision RH', done: dejaDecide },
+    { key: 'decision', label: 'Décision RH', done: dejaValidéRH || dejaRejeté },
     { key: 'contrat', label: 'Contrat', done: !!candidature.contrat_url },
   ]
 
