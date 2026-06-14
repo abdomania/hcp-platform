@@ -4,7 +4,7 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function PostesListPage() {
-  const supabase = createServerSupabase()
+  const supabase = await createServerSupabase()
 
   // 1. Requête optimisée : on demande à Supabase de compter les candidatures (count)
   // directement côté base de données pour éviter de télécharger des milliers de lignes

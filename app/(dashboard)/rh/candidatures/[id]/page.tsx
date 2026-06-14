@@ -6,7 +6,7 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function CandidatureDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createServerSupabase()
+  const supabase = await createServerSupabase()
 
   // 1. On récupère d'abord la candidature
   const { data: candidature } = await supabase
@@ -30,8 +30,17 @@ export default async function CandidatureDetailPage({ params }: { params: { id: 
 
   async function validerCandidature() {
     'use server'
-    const supabase = createServerSupabase()
+    const supabase = await createServerSupabase()
     await supabase.from('candidatures').update({ rh_validation: true, statut: 'valide' }).eq('id', params.id)
+
+    // Déclencher la génération du contrat PDF + envoi email (fire-and-forget)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    fetch(`${baseUrl}/api/contrats`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidature_id: params.id }),
+    }).catch((e) => console.error('[valider] Contrat fetch error:', e))
+
     revalidatePath(`/rh/candidatures/${params.id}`)
     revalidatePath('/rh/candidatures')
     revalidatePath('/rh')
@@ -39,7 +48,7 @@ export default async function CandidatureDetailPage({ params }: { params: { id: 
 
   async function rejeterCandidature() {
     'use server'
-    const supabase = createServerSupabase()
+    const supabase = await createServerSupabase()
     await supabase.from('candidatures').update({ rh_validation: false, statut: 'rejete' }).eq('id', params.id)
     revalidatePath(`/rh/candidatures/${params.id}`)
     revalidatePath('/rh/candidatures')
@@ -128,6 +137,14 @@ export default async function CandidatureDetailPage({ params }: { params: { id: 
         <p className="text-sm text-slate-500 mb-4">
           Validation RH actuelle : <span className="font-medium">{candidature.rh_validation ? 'Validé ✅' : 'Non validé'}</span>
         </p>
+        {candidature.contrat_url && (
+          <div className="mb-4 flex items-center gap-2 text-sm bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2">
+            <span className="text-emerald-700">Contrat généré :</span>
+            <a href={candidature.contrat_url} target="_blank" className="text-blue-600 hover:underline font-medium">
+              Télécharger le PDF ↗
+            </a>
+          </div>
+        )}
         <div className="flex gap-3">
           <form action={validerCandidature}>
             <button type="submit" className="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-emerald-700">

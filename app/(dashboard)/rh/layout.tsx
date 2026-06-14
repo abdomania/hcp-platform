@@ -3,7 +3,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import SidebarRH from '@/components/dashboard/SidebarRH'
 
 export default async function RHLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createServerSupabase()
+  const supabase = await createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) redirect('/login')

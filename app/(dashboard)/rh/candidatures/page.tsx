@@ -18,7 +18,7 @@ export default async function CandidaturesListPage({
 }: {
   searchParams: { statut?: string; poste?: string; q?: string }
 }) {
-  const supabase = createServerSupabase()
+  const supabase = await createServerSupabase()
 
   let query = supabase
     .from('candidatures')

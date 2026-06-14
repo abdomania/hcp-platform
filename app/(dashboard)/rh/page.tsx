@@ -6,7 +6,7 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function RHDashboardPage() {
-  const supabase = createServerSupabase()
+  const supabase = await createServerSupabase()
 
   // 1. Récupérer uniquement les 5 candidatures les plus récentes pour le tableau
   const { data: recentes } = await supabase
