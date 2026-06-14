@@ -145,23 +145,22 @@ export async function POST(req: NextRequest) {
     }).eq('id', candidature_id)
 
     // ── Création de compte + envoi credentials si entretien réussi ──
+    let credentialsGeneres: { email: string; mot_de_passe: string } | null = null
+
     if (noteGlobale >= 50) {
       try {
-        // Récupérer les infos du candidat + poste
         const { data: candidatureData } = await supabase
           .from('candidatures')
           .select('nom_complet, email, user_id, postes(titre)')
           .eq('id', candidature_id)
           .single()
 
-        // Ne créer le compte que si le candidat n'en a pas déjà un
         if (candidatureData && !candidatureData.user_id) {
           const motDePasse = genererMotDePasse()
           const parts = (candidatureData.nom_complet || '').trim().split(/\s+/)
           const prenom = parts[0] || ''
           const nom = parts.slice(1).join(' ') || ''
 
-          // Créer l'utilisateur Supabase Auth
           const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email: candidatureData.email,
             password: motDePasse,
@@ -169,7 +168,6 @@ export async function POST(req: NextRequest) {
           })
 
           if (!authError && authData.user) {
-            // Créer le profil candidat
             await supabaseAdmin.from('profiles').insert({
               id: authData.user.id,
               role: 'candidat',
@@ -178,15 +176,17 @@ export async function POST(req: NextRequest) {
               actif: true,
             })
 
-            // Lier le compte à la candidature
             await supabase
               .from('candidatures')
               .update({ user_id: authData.user.id })
               .eq('id', candidature_id)
 
-            // Envoyer l'email avec les credentials
+            // Retourner les credentials pour affichage direct dans l'UI
+            credentialsGeneres = { email: candidatureData.email, mot_de_passe: motDePasse }
+
+            // Tentative envoi email (non bloquant)
             const platformeUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-            await envoyerEmailCredentials({
+            envoyerEmailCredentials({
               to: candidatureData.email,
               nomComplet: candidatureData.nom_complet,
               email: candidatureData.email,
@@ -194,12 +194,11 @@ export async function POST(req: NextRequest) {
               noteGlobale,
               poste: (candidatureData.postes as any)?.titre || 'Enquêteur terrain HCP',
               platformeUrl,
-            })
+            }).catch(e => console.error('[entretien] Email credentials échoué:', e))
           }
         }
       } catch (e) {
-        // Ne pas bloquer la réponse si la création de compte échoue
-        console.error('[entretien] Création compte/email échouée:', e)
+        console.error('[entretien] Création compte échouée:', e)
       }
     }
 
@@ -207,6 +206,7 @@ export async function POST(req: NextRequest) {
       note_entretien: noteEntretien,
       note_globale: noteGlobale,
       statut,
+      credentials: credentialsGeneres,
     })
 
   } catch (err: any) {

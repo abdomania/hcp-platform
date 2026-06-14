@@ -29,6 +29,9 @@ function EntretienContent() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [note, setNote] = useState<number | null>(null)
+  const [noteGlobale, setNoteGlobale] = useState<number | null>(null)
+  const [credentials, setCredentials] = useState<{ email: string; mot_de_passe: string } | null>(null)
+  const [copied, setCopied] = useState<'email' | 'mdp' | null>(null)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -130,6 +133,8 @@ function EntretienContent() {
       if (!res.ok) throw new Error(data.error)
 
       setNote(data.note_entretien)
+      setNoteGlobale(data.note_globale)
+      if (data.credentials) setCredentials(data.credentials)
       setSubmitted(true)
     } catch (err: any) {
       alert('Erreur : ' + err.message)
@@ -155,31 +160,108 @@ function EntretienContent() {
   const question = QUESTIONS[currentQ]
   const progress = ((currentQ) / QUESTIONS.length) * 100
 
+  const copyToClipboard = (text: string, type: 'email' | 'mdp') => {
+    navigator.clipboard.writeText(text)
+    setCopied(type)
+    setTimeout(() => setCopied(null), 2000)
+  }
+
   // Écran résultat
   if (submitted && note !== null) {
-    const retenu = note >= 50
+    const retenu = (noteGlobale ?? note) >= 50
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow border p-8 text-center">
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl
-            ${retenu ? 'bg-green-100' : 'bg-orange-100'}`}>
-            {retenu ? '🎉' : '📋'}
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
+        <div className="max-w-md w-full space-y-4">
+
+          {/* Carte résultat */}
+          <div className="bg-white rounded-2xl shadow border p-8 text-center">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl
+              ${retenu ? 'bg-green-100' : 'bg-orange-100'}`}>
+              {retenu ? '🎉' : '📋'}
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {retenu ? 'Entretien validé !' : 'Entretien terminé'}
+            </h1>
+            <div className={`text-4xl font-black my-4 ${retenu ? 'text-green-600' : 'text-orange-500'}`}>
+              {note.toFixed(1)} / 100
+            </div>
+            <p className="text-gray-500 text-sm">
+              {retenu
+                ? 'Votre dossier est retenu. Accédez à votre formation avec les identifiants ci-dessous.'
+                : 'Merci pour votre participation. Nous reviendrons vers vous prochainement.'}
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {retenu ? 'Entretien validé !' : 'Entretien terminé'}
-          </h1>
-          <div className={`text-4xl font-black my-4 ${retenu ? 'text-green-600' : 'text-orange-500'}`}>
-            {note.toFixed(1)} / 100
-          </div>
-          <p className="text-gray-600 text-sm mb-6">
-            {retenu
-              ? 'Félicitations ! Vous allez recevoir un email avec vos identifiants pour accéder à la formation.'
-              : 'Merci pour votre participation. Nous reviendrons vers vous prochainement.'}
-          </p>
-          <button onClick={() => router.push('/')}
-            className="bg-blue-900 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-800">
-            Retour à l'accueil
-          </button>
+
+          {/* Popup credentials — affiché uniquement si retenu */}
+          {retenu && credentials && (
+            <div className="bg-white rounded-2xl shadow border border-green-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-lg">🔑</div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">Vos identifiants de connexion</p>
+                  <p className="text-xs text-gray-400">Copiez-les avant de quitter cette page</p>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="mb-3">
+                <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">Email</p>
+                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
+                  <span className="flex-1 text-sm font-mono text-gray-800">{credentials.email}</span>
+                  <button
+                    onClick={() => copyToClipboard(credentials.email, 'email')}
+                    className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all
+                      ${copied === 'email' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
+                    {copied === 'email' ? '✓ Copié' : 'Copier'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Mot de passe */}
+              <div className="mb-4">
+                <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">Mot de passe</p>
+                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
+                  <span className="flex-1 text-sm font-mono font-bold text-gray-900 tracking-widest">{credentials.mot_de_passe}</span>
+                  <button
+                    onClick={() => copyToClipboard(credentials.mot_de_passe, 'mdp')}
+                    className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all
+                      ${copied === 'mdp' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
+                    {copied === 'mdp' ? '✓ Copié' : 'Copier'}
+                  </button>
+                </div>
+              </div>
+
+              <a
+                href="/login"
+                className="block w-full bg-blue-900 text-white text-center font-semibold py-3 rounded-xl hover:bg-blue-800 transition-colors text-sm">
+                Se connecter et accéder à la formation →
+              </a>
+
+              <p className="text-xs text-gray-400 text-center mt-3">
+                Un email de confirmation vous a également été envoyé.
+              </p>
+            </div>
+          )}
+
+          {/* Cas retenu mais credentials déjà existants (compte déjà créé) */}
+          {retenu && !credentials && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-center">
+              <p className="text-blue-800 text-sm font-medium mb-3">
+                Vos identifiants ont été envoyés à votre adresse email.
+              </p>
+              <a href="/login" className="text-blue-700 underline text-sm font-semibold">
+                Se connecter →
+              </a>
+            </div>
+          )}
+
+          {!retenu && (
+            <button onClick={() => router.push('/')}
+              className="w-full bg-gray-800 text-white font-semibold px-6 py-3 rounded-xl hover:bg-gray-700 text-sm">
+              Retour à l'accueil
+            </button>
+          )}
+
         </div>
       </div>
     )
