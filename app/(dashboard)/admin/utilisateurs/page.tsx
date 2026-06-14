@@ -32,10 +32,16 @@ export default function UtilisateursPage() {
 
   const charger = async () => {
     setLoading(true)
-    const res = await fetch('/api/admin/utilisateurs')
-    const data = await res.json()
-    setUtilisateurs(data.utilisateurs || [])
-    setLoading(false)
+    try {
+      const res = await fetch('/api/admin/utilisateurs')
+      const data = await res.json()
+      if (!res.ok) { setErreur(data.error || 'Erreur serveur'); setLoading(false); return }
+      setUtilisateurs(data.utilisateurs || [])
+    } catch (e: any) {
+      setErreur('Impossible de charger les utilisateurs : ' + e.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { charger() }, [])
@@ -92,6 +98,12 @@ export default function UtilisateursPage() {
           <Plus size={16} /> Nouveau compte
         </button>
       </div>
+
+      {erreur && !showModal && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-3 text-sm font-medium">
+          {erreur}
+        </div>
+      )}
 
       {succes && (
         <div className="mb-6 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-3 text-sm font-medium">
