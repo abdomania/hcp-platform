@@ -55,13 +55,6 @@ export default function PostesActions({ enquetes }: { enquetes: Enquete[] }) {
         <Plus size={16} /> Nouveau poste
       </button>
 
-      {/* Exposer toggleStatut via attribut data pour les boutons du tableau */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.__toggleStatut = ${toggleStatut.toString()}`,
-        }}
-      />
-
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
