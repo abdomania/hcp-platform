@@ -24,7 +24,7 @@ export async function GET() {
 
   const { data: profiles, error } = await supabaseAdmin
     .from('profiles')
-    .select('id, nom_complet, role, created_at')
+    .select('id, nom, prenom, role, created_at')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -33,7 +33,7 @@ export async function GET() {
   const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
   const emailMap = Object.fromEntries(authUsers.map(u => [u.id, u.email]))
 
-  const result = profiles.map(p => ({ ...p, email: emailMap[p.id] || '' }))
+  const result = profiles.map(p => ({ ...p, nom_complet: [p.prenom, p.nom].filter(Boolean).join(' '), email: emailMap[p.id] || '' }))
   return NextResponse.json({ utilisateurs: result })
 }
 
@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
   const admin = await verifierAdmin()
   if (!admin) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
 
-  const { email, mot_de_passe, nom_complet, role } = await req.json()
+  const { email, mot_de_passe, nom, prenom, role } = await req.json()
 
-  if (!email || !mot_de_passe || !nom_complet || !role) {
+  if (!email || !mot_de_passe || !nom || !prenom || !role) {
     return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 })
   }
 
@@ -63,7 +63,8 @@ export async function POST(req: NextRequest) {
 
   const { error: profileError } = await supabaseAdmin.from('profiles').insert({
     id: authData.user.id,
-    nom_complet,
+    nom,
+    prenom,
     role
   })
 

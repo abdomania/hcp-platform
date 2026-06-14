@@ -10,15 +10,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, nom_complet')
+    .select('role, nom, prenom')
     .eq('id', user.id)
     .single()
 
   if (!profile || profile.role !== 'admin') redirect('/')
 
+  const nomComplet = [profile.prenom, profile.nom].filter(Boolean).join(' ') || 'Administrateur'
+
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <SidebarAdmin nomComplet={profile.nom_complet} />
+      <SidebarAdmin nomComplet={nomComplet} />
       <main className="flex-1 p-8 overflow-y-auto">{children}</main>
     </div>
   )

@@ -24,7 +24,7 @@ export default function UtilisateursPage() {
   const [supprimerId, setSupprimerId] = useState<string | null>(null)
   const [filtre, setFiltre] = useState<string>('tous')
 
-  const [form, setForm] = useState({ email: '', mot_de_passe: '', nom_complet: '', role: 'rh' })
+  const [form, setForm] = useState({ email: '', mot_de_passe: '', nom: '', prenom: '', role: 'rh' })
   const [showMdp, setShowMdp] = useState(false)
   const [erreur, setErreur] = useState('')
   const [succes, setSucces] = useState('')
@@ -52,7 +52,7 @@ export default function UtilisateursPage() {
     setSaving(false)
     if (!res.ok) { setErreur(data.error); return }
     setSucces(`Compte créé avec succès !`)
-    setForm({ email: '', mot_de_passe: '', nom_complet: '', role: 'rh' })
+    setForm({ email: '', mot_de_passe: '', nom: '', prenom: '', role: 'rh' })
     setShowModal(false)
     charger()
   }
@@ -172,14 +172,25 @@ export default function UtilisateursPage() {
               </button>
             </div>
             <form onSubmit={creerUtilisateur} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-600 mb-1.5">Nom complet</label>
-                <input
-                  type="text" required value={form.nom_complet}
-                  onChange={e => setForm(f => ({ ...f, nom_complet: e.target.value }))}
-                  placeholder="Ahmed Benali"
-                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-1.5">Prénom</label>
+                  <input
+                    type="text" required value={form.prenom}
+                    onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))}
+                    placeholder="Ahmed"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-1.5">Nom</label>
+                  <input
+                    type="text" required value={form.nom}
+                    onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
+                    placeholder="Benali"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-1.5">Email</label>
