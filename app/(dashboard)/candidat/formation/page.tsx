@@ -86,7 +86,7 @@ function FormationContent() {
     const currentQ = chapitre.quiz[questionIndex]
     
     // Calcul score temporaire
-    if (reponseSelectionnee === currentQ.bonne_reponse) {
+    if (reponseSelectionnee === currentQ.bonne_reponse - 1) {
       setCurrentQuizScore(s => s + 1)
     }
 
@@ -101,7 +101,7 @@ function FormationContent() {
 
   const finirQuiz = async () => {
     const chapitre = formation.chapitres[chapitreActif]
-    const scoreFinal = Math.round(((currentQuizScore + (reponseSelectionnee === chapitre.quiz[questionIndex].bonne_reponse ? 1 : 0)) / chapitre.quiz.length) * 100)
+    const scoreFinal = Math.round(((currentQuizScore + (reponseSelectionnee === chapitre.quiz[questionIndex].bonne_reponse - 1 ? 1 : 0)) / chapitre.quiz.length) * 100)
 
     try {
       await fetch('/api/formations/progression', {
@@ -129,7 +129,7 @@ function FormationContent() {
   const soumettreExamenFinal = async () => {
     let bonnes = 0
     formation.examen_final.forEach((q: any, i: number) => {
-      if (reponsesExamen[i] === q.bonne_reponse) bonnes++
+      if (reponsesExamen[i] === q.bonne_reponse - 1) bonnes++
     })
     const note = Math.round((bonnes / formation.examen_final.length) * 100)
 
@@ -265,7 +265,7 @@ function FormationContent() {
               <div className="space-y-4 mb-10">
                 {chapitre.quiz[questionIndex].options.map((opt: string, i: number) => {
                   const isSelected = reponseSelectionnee === i
-                  const isCorrect = i === chapitre.quiz[questionIndex].bonne_reponse
+                  const isCorrect = i === chapitre.quiz[questionIndex].bonne_reponse - 1
                   let colorClass = "border-slate-200 hover:border-blue-300"
                   if (reponseValidee) {
                     if (isCorrect) colorClass = "border-green-500 bg-green-50"
