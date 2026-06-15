@@ -15,11 +15,20 @@ type Question = {
 
 type EnqueteJoin = { id: string; titre: string }
 
+// Type brut renvoyé par Supabase (enquetes peut être objet ou tableau)
 type PosteJoin = {
   id: string
   titre: string
   enquete_id?: string | null
   enquetes?: EnqueteJoin | EnqueteJoin[] | null
+}
+
+// Type normalisé après getPoste()
+type PosteNorm = {
+  id: string
+  titre: string
+  enquete_id?: string | null
+  enquetes?: EnqueteJoin | null
 }
 
 type Formation = {
@@ -34,11 +43,10 @@ type Formation = {
 
 type Enquete = { id: string; titre: string; statut?: string | null }
 
-function getPoste(p: PosteJoin | PosteJoin[] | null | undefined): PosteJoin | null {
+function getPoste(p: PosteJoin | PosteJoin[] | null | undefined): PosteNorm | null {
   if (!p) return null
   const poste = Array.isArray(p) ? (p[0] ?? null) : p
   if (!poste) return null
-  // Normaliser aussi enquetes (peut être un tableau ou un objet)
   return {
     ...poste,
     enquetes: poste.enquetes
