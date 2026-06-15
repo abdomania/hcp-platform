@@ -13,21 +13,30 @@ type Question = {
   explication?: string
 }
 
+type PosteJoin = {
+  id: string
+  titre: string
+  enquete_id?: string | null
+  enquetes?: { id: string; titre: string } | null
+}
+
 type Formation = {
   id: string
   nb_chapitres: number
   created_at: string
   chapitres: any[]
   examen_final: Question[]
-  postes?: {
-    id: string
-    titre: string
-    enquete_id?: string | null
-    enquetes?: { id: string; titre: string } | null
-  } | null
+  // Supabase peut renvoyer un objet ou un tableau selon la FK
+  postes?: PosteJoin | PosteJoin[] | null
 }
 
 type Enquete = { id: string; titre: string; statut?: string | null }
+
+// Normalise postes (objet ou tableau) → toujours un objet ou null
+function getPoste(p: PosteJoin | PosteJoin[] | null | undefined): PosteJoin | null {
+  if (!p) return null
+  return Array.isArray(p) ? (p[0] ?? null) : p
+}
 
 export default function FormationsClient({
   formations,
@@ -54,7 +63,7 @@ export default function FormationsClient({
 
   const openAssoc = (f: Formation) => {
     setModalAssoc(f)
-    setEnqueteChoisie(f.postes?.enquete_id || '')
+    setEnqueteChoisie(getPoste(f.postes)?.enquete_id || '')
     setErreur('')
   }
 
@@ -124,7 +133,7 @@ export default function FormationsClient({
   }
 
   const supprimer = async (f: Formation) => {
-    if (!confirm(`Supprimer la formation "${f.postes?.titre || 'cette formation'}" ? Cette action est irréversible.`)) return
+    if (!confirm(`Supprimer la formation "${getPoste(f.postes)?.titre || 'cette formation'}" ? Cette action est irréversible.`)) return
     await fetch('/api/formations/manage', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -173,8 +182,9 @@ export default function FormationsClient({
             </thead>
             <tbody>
               {formations.map((f) => {
+                const poste = getPoste(f.postes)
                 const nbQ = f.examen_final?.length || 0
-                const enquete = f.postes?.enquetes
+                const enquete = poste?.enquetes
 
                 return (
                   <tr key={f.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
@@ -184,7 +194,7 @@ export default function FormationsClient({
                           <BookOpen size={16} className="text-blue-600" />
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-800">{f.postes?.titre || 'Formation sans poste'}</p>
+                          <p className="font-semibold text-slate-800">{poste?.titre || 'Formation sans poste'}</p>
                           <p className="text-xs text-slate-400 mt-0.5">{f.nb_chapitres} chapitre(s)</p>
                         </div>
                       </div>
@@ -256,7 +266,7 @@ export default function FormationsClient({
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <div>
                 <h2 className="font-bold text-slate-800">Associer à une enquête</h2>
-                <p className="text-xs text-slate-400 mt-0.5">{modalAssoc.postes?.titre}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{getPoste(modalAssoc.postes)?.titre}</p>
               </div>
               <button onClick={() => setModalAssoc(null)} className="p-2 hover:bg-slate-100 rounded-lg">
                 <X size={16} />
@@ -295,7 +305,7 @@ export default function FormationsClient({
             <div className="flex items-center justify-between p-6 border-b border-slate-100 flex-shrink-0">
               <div>
                 <h2 className="font-bold text-slate-800">Questionnaire d'examen</h2>
-                <p className="text-xs text-slate-400 mt-0.5">{modalQuiz.postes?.titre} — {questions.length} question(s)</p>
+                <p className="text-xs text-slate-400 mt-0.5">{getPoste(modalQuiz.postes)?.titre} — {questions.length} question(s)</p>
               </div>
               <button onClick={() => setModalQuiz(null)} className="p-2 hover:bg-slate-100 rounded-lg">
                 <X size={16} />
