@@ -48,9 +48,16 @@ export default function TerrainMap({ positions, signalements }: Props) {
   const mapInstance = useRef<any>(null)
 
   useEffect(() => {
-    if (!mapRef.current || mapInstance.current) return
+    if (!mapRef.current) return
 
     import('leaflet').then(L => {
+      // Si le container est déjà initialisé par Leaflet, le nettoyer
+      if ((mapRef.current as any)._leaflet_id) {
+        mapInstance.current?.remove()
+        mapInstance.current = null
+      }
+      if (mapInstance.current) return
+
       // Fix marker icons (Next.js issue)
       delete (L.Icon.Default.prototype as any)._getIconUrl
       L.Icon.Default.mergeOptions({
