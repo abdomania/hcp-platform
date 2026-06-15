@@ -1,20 +1,9 @@
 import { createServerSupabase } from '@/lib/supabase-server'
-import nextDynamic from 'next/dynamic'
 import { MapPin, AlertTriangle, Users, CheckCircle, Clock } from 'lucide-react'
 import SignalementsTable from './SignalementsTable'
+import TerrainMapWrapper from './TerrainMapWrapper'
 
 export const dynamic = 'force-dynamic'
-
-const TerrainMap = nextDynamic(() => import('@/components/dashboard/TerrainMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-slate-100 rounded-xl flex items-center justify-center">
-      <div className="text-slate-400 text-sm flex items-center gap-2">
-        <MapPin size={18} className="animate-pulse" /> Chargement de la carte...
-      </div>
-    </div>
-  ),
-})
 
 const TYPE_LABELS: Record<string, string> = {
   refus: 'Refus', absent: 'Absent', adresse_incorrecte: 'Adresse incorrecte',
@@ -153,7 +142,7 @@ export default async function TerrainPage() {
             </div>
           </div>
           <div className="h-[calc(100%-49px)]">
-            <TerrainMap positions={positions} signalements={signalements} />
+            <TerrainMapWrapper positions={positions} signalements={signalements} />
           </div>
         </div>
 
