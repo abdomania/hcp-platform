@@ -13,11 +13,13 @@ type Question = {
   explication?: string
 }
 
+type EnqueteJoin = { id: string; titre: string }
+
 type PosteJoin = {
   id: string
   titre: string
   enquete_id?: string | null
-  enquetes?: { id: string; titre: string } | null
+  enquetes?: EnqueteJoin | EnqueteJoin[] | null
 }
 
 type Formation = {
@@ -32,10 +34,17 @@ type Formation = {
 
 type Enquete = { id: string; titre: string; statut?: string | null }
 
-// Normalise postes (objet ou tableau) → toujours un objet ou null
 function getPoste(p: PosteJoin | PosteJoin[] | null | undefined): PosteJoin | null {
   if (!p) return null
-  return Array.isArray(p) ? (p[0] ?? null) : p
+  const poste = Array.isArray(p) ? (p[0] ?? null) : p
+  if (!poste) return null
+  // Normaliser aussi enquetes (peut être un tableau ou un objet)
+  return {
+    ...poste,
+    enquetes: poste.enquetes
+      ? (Array.isArray(poste.enquetes) ? (poste.enquetes[0] ?? null) : poste.enquetes)
+      : null,
+  }
 }
 
 export default function FormationsClient({
@@ -58,6 +67,7 @@ export default function FormationsClient({
   const [savingQuiz, setSavingQuiz] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
   const [expandedQ, setExpandedQ] = useState<number | null>(null)
+  const [confirm, setConfirm] = useState<{ message: string; onOk: () => void } | null>(null)
 
   // État erreur global
   const [erreur, setErreur] = useState('')
@@ -91,18 +101,23 @@ export default function FormationsClient({
 
   const regenererParIA = async () => {
     if (!modalQuiz) return
-    if (!confirm('Régénérer l\'examen par IA ? Les questions actuelles seront remplacées.')) return
-    setRegenerating(true); setErreur('')
+    setConfirm({
+      message: 'Régénérer les questions par IA ? Les questions actuelles seront remplacées par de nouvelles basées sur le contenu de la formation.',
+      onOk: async () => {
+        setConfirm(null)
+        setRegenerating(true); setErreur('')
     const res = await fetch('/api/formations/regenerer-examen', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ formation_id: modalQuiz.id }),
     })
     const data = await res.json()
-    setRegenerating(false)
-    if (!res.ok) { setErreur(data.error); return }
-    setQuestions(data.questions)
-    setExpandedQ(null)
+        setRegenerating(false)
+        if (!res.ok) { setErreur(data.error); return }
+        setQuestions(data.questions)
+        setExpandedQ(null)
+      },
+    })
   }
 
   const ajouterQuestion = () => {
@@ -149,14 +164,19 @@ export default function FormationsClient({
     router.refresh()
   }
 
-  const supprimer = async (f: Formation) => {
-    if (!confirm(`Supprimer la formation "${getPoste(f.postes)?.titre || 'cette formation'}" ? Cette action est irréversible.`)) return
-    await fetch('/api/formations/manage', {
+  const supprimer = (f: Formation) => {
+    setConfirm({
+      message: `Supprimer la formation "${getPoste(f.postes)?.titre || 'cette formation'}" ? Cette action est irréversible.`,
+      onOk: async () => {
+        setConfirm(null)
+        await fetch('/api/formations/manage', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: f.id }),
+          body: JSON.stringify({ id: f.id }),
+        })
+        router.refresh()
+      },
     })
-    router.refresh()
   }
 
   return (
@@ -273,6 +293,29 @@ export default function FormationsClient({
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* MODAL CONFIRMATION */}
+      {confirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <p className="text-slate-800 font-medium text-sm leading-relaxed">{confirm.message}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirm(null)}
+                className="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-500 hover:bg-slate-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirm.onOk}
+                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700"
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
