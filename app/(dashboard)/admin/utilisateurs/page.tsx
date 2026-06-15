@@ -7,13 +7,14 @@ type Utilisateur = {
   id: string
   email: string
   nom_complet: string
-  role: 'admin' | 'rh' | 'candidat'
+  role: 'admin' | 'rh' | 'superviseur' | 'candidat'
   created_at: string
 }
 
-const ROLE_CONFIG = {
+const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   admin: { label: 'Administrateur', color: 'bg-indigo-100 text-indigo-700', icon: <Shield size={12} /> },
   rh: { label: 'Responsable RH', color: 'bg-blue-100 text-blue-700', icon: <UserCheck size={12} /> },
+  superviseur: { label: 'Superviseur', color: 'bg-emerald-100 text-emerald-700', icon: <UserCheck size={12} /> },
   candidat: { label: 'Candidat', color: 'bg-green-100 text-green-700', icon: <User size={12} /> },
 }
 
@@ -79,6 +80,7 @@ export default function UtilisateursPage() {
     { key: 'tous', label: 'Tous' },
     { key: 'admin', label: 'Admins' },
     { key: 'rh', label: 'RH' },
+    { key: 'superviseur', label: 'Superviseurs' },
     { key: 'candidat', label: 'Candidats' },
   ]
 
@@ -235,6 +237,7 @@ export default function UtilisateursPage() {
                   className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 bg-white"
                 >
                   <option value="rh">Responsable RH</option>
+                  <option value="superviseur">Superviseur Terrain</option>
                   <option value="admin">Administrateur</option>
                   <option value="candidat">Candidat</option>
                 </select>
