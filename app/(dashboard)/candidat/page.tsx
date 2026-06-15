@@ -30,9 +30,9 @@ export default async function CandidatPage() {
   }
 
   // Redirection selon le statut
-  if (candidature.statut === 'formation' || candidature.statut === 'valide') {
-    redirect(`/candidat/formation`)
+  if (candidature.statut === 'valide') {
+    redirect('/candidat/terrain')
   }
 
-  redirect(`/candidat/formation`)
+  redirect('/candidat/formation')
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Users, Briefcase, ClipboardList, BookOpen, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, Briefcase, ClipboardList, BookOpen, LogOut, MapPin } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 
 export default function SidebarRH() {
@@ -26,6 +26,7 @@ export default function SidebarRH() {
         <NavLink href="/rh/postes" icon={<Briefcase size={18} />} label="Postes" />
         <NavLink href="/rh/enquetes" icon={<ClipboardList size={18} />} label="Enquêtes" />
         <NavLink href="/rh/formations" icon={<BookOpen size={18} />} label="Formations" />
+        <NavLink href="/rh/terrain" icon={<MapPin size={18} />} label="Terrain" />
       </nav>
       <button
         onClick={signOut}
