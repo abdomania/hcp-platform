@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Briefcase, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, Users, Briefcase, ClipboardList, BookOpen } from 'lucide-react'
 
 export default function SidebarRH() {
   return (
@@ -12,6 +12,7 @@ export default function SidebarRH() {
       <NavLink href="/rh/candidatures" icon={<Users size={18} />} label="Candidatures" />
       <NavLink href="/rh/postes" icon={<Briefcase size={18} />} label="Postes" />
       <NavLink href="/rh/enquetes" icon={<ClipboardList size={18} />} label="Enquêtes" />
+      <NavLink href="/rh/formations" icon={<BookOpen size={18} />} label="Formations" />
     </aside>
   )
 }
