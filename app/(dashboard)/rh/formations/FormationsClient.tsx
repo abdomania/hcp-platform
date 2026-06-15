@@ -56,6 +56,7 @@ export default function FormationsClient({
   const [modalQuiz, setModalQuiz] = useState<Formation | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
   const [savingQuiz, setSavingQuiz] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
   const [expandedQ, setExpandedQ] = useState<number | null>(null)
 
   // État erreur global
@@ -85,6 +86,22 @@ export default function FormationsClient({
     setModalQuiz(f)
     setQuestions(f.examen_final ? JSON.parse(JSON.stringify(f.examen_final)) : [])
     setErreur('')
+    setExpandedQ(null)
+  }
+
+  const regenererParIA = async () => {
+    if (!modalQuiz) return
+    if (!confirm('Régénérer l\'examen par IA ? Les questions actuelles seront remplacées.')) return
+    setRegenerating(true); setErreur('')
+    const res = await fetch('/api/formations/regenerer-examen', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formation_id: modalQuiz.id }),
+    })
+    const data = await res.json()
+    setRegenerating(false)
+    if (!res.ok) { setErreur(data.error); return }
+    setQuestions(data.questions)
     setExpandedQ(null)
   }
 
@@ -307,9 +324,26 @@ export default function FormationsClient({
                 <h2 className="font-bold text-slate-800">Questionnaire d'examen</h2>
                 <p className="text-xs text-slate-400 mt-0.5">{getPoste(modalQuiz.postes)?.titre} — {questions.length} question(s)</p>
               </div>
-              <button onClick={() => setModalQuiz(null)} className="p-2 hover:bg-slate-100 rounded-lg">
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={regenererParIA}
+                  disabled={regenerating}
+                  className="flex items-center gap-2 bg-violet-600 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
+                  title="Régénérer les questions via l'IA à partir des chapitres"
+                >
+                  {regenerating ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Génération...
+                    </>
+                  ) : (
+                    <>🤖 Régénérer par IA</>
+                  )}
+                </button>
+                <button onClick={() => setModalQuiz(null)} className="p-2 hover:bg-slate-100 rounded-lg">
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-3">
