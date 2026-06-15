@@ -13,6 +13,7 @@ export default function PostesActions({ enquetes }: { enquetes: Enquete[] }) {
   const [erreur, setErreur] = useState('')
   const [form, setForm] = useState({
     titre: '',
+    description: '',
     enquete_id: '',
     date_limite: '',
     seuil_score_cv: 60,
@@ -32,7 +33,7 @@ export default function PostesActions({ enquetes }: { enquetes: Enquete[] }) {
     setSaving(false)
     if (!res.ok) { setErreur(data.error); return }
     setShowModal(false)
-    setForm({ titre: '', enquete_id: '', date_limite: '', seuil_score_cv: 60, seuil_note_globale: 50, seuil_formation: 70 })
+    setForm({ titre: '', description: '', enquete_id: '', date_limite: '', seuil_score_cv: 60, seuil_note_globale: 50, seuil_formation: 70 })
     router.refresh()
   }
 
@@ -72,6 +73,16 @@ export default function PostesActions({ enquetes }: { enquetes: Enquete[] }) {
                   onChange={e => setForm(f => ({ ...f, titre: e.target.value }))}
                   placeholder="ex: Enquêteur Terrain — Région Rabat-Salé"
                   className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-600 mb-1.5">Description *</label>
+                <textarea
+                  required value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Description du poste, missions, profil recherché..."
+                  rows={3}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 resize-none"
                 />
               </div>
               {enquetes.length > 0 && (

@@ -7,12 +7,14 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const body = await req.json()
-  const { titre, enquete_id, date_limite, seuil_score_cv, seuil_note_globale, seuil_formation } = body
+  const { titre, description, enquete_id, date_limite, seuil_score_cv, seuil_note_globale, seuil_formation } = body
 
   if (!titre) return NextResponse.json({ error: 'Le titre est requis' }, { status: 400 })
+  if (!description) return NextResponse.json({ error: 'La description est requise' }, { status: 400 })
 
   const { data, error } = await supabase.from('postes').insert({
     titre,
+    description,
     enquete_id: enquete_id || null,
     date_limite: date_limite || null,
     seuil_score_cv: seuil_score_cv ?? 60,
