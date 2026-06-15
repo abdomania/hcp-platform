@@ -2,18 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Briefcase, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Users, Briefcase, ClipboardList } from 'lucide-react'
 
 export default function SidebarRH() {
   return (
     <aside className="w-64 bg-slate-900 text-white p-6 flex flex-col gap-2 shrink-0 border-r border-slate-800">
       <h2 className="text-lg font-black mb-8 px-2 text-slate-100 tracking-wide">Espace RH — HCP</h2>
-      
-      {/* On utilise "exact={true}" pour le dashboard afin d'éviter qu'il ne s'allume quand on est sur /rh/candidatures */}
       <NavLink href="/rh" icon={<LayoutDashboard size={18} />} label="Tableau de bord" exact />
       <NavLink href="/rh/candidatures" icon={<Users size={18} />} label="Candidatures" />
-      <NavLink href="/rh/postes" icon={<Briefcase size={18} />} label="Postes" exact />
-      <NavLink href="/rh/postes/formation" icon={<BookOpen size={18} />} label="Formations" />
+      <NavLink href="/rh/postes" icon={<Briefcase size={18} />} label="Postes" />
+      <NavLink href="/rh/enquetes" icon={<ClipboardList size={18} />} label="Enquêtes" />
     </aside>
   )
 }
