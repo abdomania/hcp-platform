@@ -52,7 +52,7 @@ export default function TerrainClient({ candidatureId, questionnaires, enqueteId
         fetch('/api/terrain/positions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ candidature_id: candidatureId, latitude: coords.lat, longitude: coords.lng }),
+          body: JSON.stringify({ latitude: coords.lat, longitude: coords.lng }),
         }).catch(() => {})
       },
       err => setGpsError('Impossible d\'obtenir le GPS. Vérifiez les permissions.'),

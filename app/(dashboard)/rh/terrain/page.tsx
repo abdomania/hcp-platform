@@ -13,28 +13,28 @@ const TYPE_LABELS: Record<string, string> = {
 export default async function TerrainPage() {
   const supabase = await createServerSupabase()
 
-  // Dernières positions par enquêteur (1 par candidature)
+  // Dernières positions par enquêteur depuis positions_gps
   const { data: positionsRaw } = await supabase
-    .from('positions')
-    .select('id, candidature_id, latitude, longitude, created_at, candidatures(nom_complet)')
+    .from('positions_gps')
+    .select('id, user_id, latitude, longitude, created_at, profiles(nom, prenom)')
     .order('created_at', { ascending: false })
-    .limit(200)
+    .limit(500)
 
-  // Dédupliquer : garder seulement la dernière position par candidature
-  const seenCandidatures = new Set<string>()
+  // Dédupliquer : garder seulement la dernière position par user
+  const seenUsers = new Set<string>()
   const positions = (positionsRaw || [])
     .filter(p => {
-      if (seenCandidatures.has(p.candidature_id)) return false
-      seenCandidatures.add(p.candidature_id)
+      if (seenUsers.has(p.user_id)) return false
+      seenUsers.add(p.user_id)
       return true
     })
-    .map(p => ({
+    .map((p: any) => ({
       id: p.id,
-      candidature_id: p.candidature_id,
+      candidature_id: p.user_id,
       latitude: p.latitude,
       longitude: p.longitude,
       created_at: p.created_at,
-      nom: (p.candidatures as any)?.nom_complet || 'Enquêteur',
+      nom: p.profiles ? `${p.profiles.prenom || ''} ${p.profiles.nom || ''}`.trim() || 'Enquêteur' : 'Enquêteur',
     }))
 
   // Signalements
