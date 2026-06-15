@@ -1,12 +1,11 @@
 import { createServerSupabase } from '@/lib/supabase-server'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { MapPin, AlertTriangle, Users, CheckCircle, Clock } from 'lucide-react'
 import SignalementsTable from './SignalementsTable'
 
-export const dynamic_ = 'force-dynamic'
-export { dynamic_ as dynamic }
+export const dynamic = 'force-dynamic'
 
-const TerrainMap = dynamic(() => import('@/components/dashboard/TerrainMap'), {
+const TerrainMap = nextDynamic(() => import('@/components/dashboard/TerrainMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-slate-100 rounded-xl flex items-center justify-center">
