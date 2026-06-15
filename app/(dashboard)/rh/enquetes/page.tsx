@@ -8,7 +8,7 @@ export default async function EnquetesPage() {
 
   const { data: enquetes } = await supabase
     .from('enquetes')
-    .select('id, titre, description, annee, created_at')
+    .select('id, titre, description, date_debut, date_fin, statut, created_at')
     .order('created_at', { ascending: false })
 
   // Nombre de postes liés à chaque enquête

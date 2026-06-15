@@ -17,13 +17,15 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const body = await req.json()
-  const { titre, description, annee } = body
+  const { titre, description, date_debut, date_fin, statut } = body
   if (!titre) return NextResponse.json({ error: 'Le titre est requis' }, { status: 400 })
 
   const { data, error } = await supabase.from('enquetes').insert({
     titre,
     description: description || null,
-    annee: annee || null,
+    date_debut: date_debut || null,
+    date_fin: date_fin || null,
+    statut: statut || 'planifiee',
   }).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
