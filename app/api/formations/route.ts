@@ -63,9 +63,19 @@ Retourne UNIQUEMENT cet objet JSON :
     const structureResult = await generateWithRetry(model, promptStructure)
     const formation = JSON.parse(structureResult.response.text())
 
-    const promptExamen = `Génère un examen final JSON pour cette formation. 
-      Format: {"questions": [{"id": number, "question": "string", "options": ["string","string","string","string"], "bonne_reponse": number, "explication": "string", "chapitre_source": number}]}`
-    
+    // Résumé compact des chapitres pour contextualiser l'examen
+    const resumeChapitres = formation.chapitres
+      .map((c: any) => `Chapitre ${c.id} — ${c.titre} : ${c.resume}`)
+      .join('\n')
+
+    const promptExamen = `Tu es un expert pédagogique. Génère un examen final de 20 questions basé UNIQUEMENT sur le contenu des chapitres ci-dessous. Chaque question doit tester une notion précise issue de ces chapitres.
+
+CHAPITRES DE LA FORMATION :
+${resumeChapitres}
+
+Retourne UNIQUEMENT ce JSON (sans texte autour) :
+{"questions": [{"id": number, "question": "string", "options": ["string","string","string","string"], "bonne_reponse": number, "explication": "string", "chapitre_source": number}]}`
+
     const examResult = await generateWithRetry(model, promptExamen)
     const examen = JSON.parse(examResult.response.text())
 
